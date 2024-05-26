@@ -1,95 +1,93 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html>https://github.com/loginfordash/Aes/blob/main/aes2.html
+<html lang="en">
 <head>
-  <title>Rohama's First Project</title>
-  <style>
-    /* Dark theme CSS */
-    body {
-      background-color: #333;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: #444;
-      border: 1px solid #555;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-    .input-field {
-      margin-bottom: 20px;
-    }
-    .input-field input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #555;
-      color: #fff;
-    }
-    .input-field input[type="text"]:focus {
-      background-color: #666;
-    }
-    .button {
-      background-color: #666;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .button:hover {
-      background-color: #777;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohama's First Project</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .encryption-tool {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 4px;
+            background-color: #333;
+            color: #ffffff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 4px;
+            background-color: #6200ee;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3700b3;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Rohama's First Project</h1>
-    <form>
-      <div class="input-field">
-        <input type="text" id="plaintext" placeholder="Enter text to encrypt">
-      </div>
-      <div class="input-field">
-        <input type="text" id="secretkey" placeholder="Enter 128-bit secret key (16 characters)">
-      </div>
-      <button class="button" id="encrypt-btn">Encrypt</button>
-      <div id="encrypted-text"></div>
-    </form>
-  </div>
+    <div class="container">
+        <h1>Rohama's First Project</h1>
+        <div class="encryption-tool">
+            <textarea id="inputText" placeholder="Enter text to encrypt"></textarea>
+            <input type="text" id="secretKey" placeholder="Enter 128-bit secret key">
+            <button onclick="encryptText()">Encrypt</button>
+            <textarea id="outputText" placeholder="Encrypted text will appear here" readonly></textarea>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function encryptText() {
+            const inputText = document.getElementById('inputText').value;
+            const secretKey = document.getElementById('secretKey').value;
 
-  <script>
-    // AES encryption function
-    function encryptAES(plaintext, secretkey) {
-      const crypto = window.crypto || window.msCrypto;
-      const key = crypto.getRandomValues(new Uint8Array(16)); // 128-bit key
-      key.set(secretkey.split('').map(c => c.charCodeAt(0))); // set secret key
+            if (secretKey.length !== 16) {
+                alert('The secret key must be 128 bits (16 characters) long.');
+                return;
+            }
 
-      const plaintextBytes = new TextEncoder('utf-8').encode(plaintext);
-      const cipher = crypto.subtle.encrypt({
-        name: 'AES-ECB',
-        iv: new Uint8Array(0) // ECB mode doesn't use IV
-      }, key, plaintextBytes);
+            const encrypted = CryptoJS.AES.encrypt(inputText, CryptoJS.enc.Utf8.parse(secretKey), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
 
-      return btoa(String.fromCharCode(...new Uint8Array(cipher)));
-    }
-
-    // Event listener for encrypt button
-    document.getElementById('encrypt-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      const plaintext = document.getElementById('plaintext').value;
-      const secretkey = document.getElementById('secretkey').value;
-
-      if (plaintext && secretkey) {
-        const encryptedText = encryptAES(plaintext, secretkey);
-        document.getElementById('encrypted-text').innerHTML = `Encrypted text: ${encryptedText}`;
-      } else {
-        alert('Please enter both plaintext and secret key');
-      }
-    });
-  </script>
+            const encryptedBase64 = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
+            document.getElementById('outputText').value = encryptedBase64;
+        }
+    </script>
 </body>
 </html>
