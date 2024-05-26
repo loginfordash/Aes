@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohama's First Project</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes shootingStars {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(transparent, white);
+            animation: shootingStars 3s linear infinite;
+            opacity: 0.5;
+        }
+
+        .star:nth-child(1) { left: 10%; animation-duration: 2s; }
+        .star:nth-child(2) { left: 20%; animation-duration: 3s; animation-delay: 1s; }
+        .star:nth-child(3) { left: 30%; animation-duration: 2.5s; animation-delay: 0.5s; }
+        .star:nth-child(4) { left: 40%; animation-duration: 4s; animation-delay: 2s; }
+        .star:nth-child(5) { left: 50%; animation-duration: 3.5s; animation-delay: 1.5s; }
+        .star:nth-child(6) { left: 60%; animation-duration: 2.2s; animation-delay: 1.2s; }
+        .star:nth-child(7) { left: 70%; animation-duration: 2.8s; animation-delay: 0.8s; }
+        .star:nth-child(8) { left: 80%; animation-duration: 3.3s; animation-delay: 1.3s; }
+        .star:nth-child(9) { left: 90%; animation-duration: 2.7s; animation-delay: 0.7s; }
+        .star:nth-child(10) { left: 100%; animation-duration: 3.1s; animation-delay: 1.1s; }
+
+        .container {
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 1s ease-in-out;
+            z-index: 1;
+            position: relative;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-family: 'Great Vibes', cursive;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: background 0.3s ease;
+        }
+
+        textarea:focus, input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6200ee, #3700b3);
+            color: #ffffff;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #3700b3, #6200ee);
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+
+    <div class="container">
+        <h1>Rohama's First Project</h1>
+        <div class="encryption-tool">
+            <textarea id="inputText" placeholder="Enter text to encrypt"></textarea>
+            <input type="text" id="secretKey" placeholder="Enter 128-bit secret key">
+            <button onclick="encryptText()">Encrypt</button>
+            <textarea id="outputText" placeholder="Encrypted text will appear here" readonly></textarea>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        document.getElementById('inputText').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('secretKey').focus();
+            }
+        });
+
+        document.getElementById('secretKey').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                encryptText();
+            }
+        });
+
+        function encryptText() {
+            const inputText = document.getElementById('inputText').value;
+            const secretKey = document.getElementById('secretKey').value;
+
+            if (secretKey.length !== 16) {
+                alert('The secret key must be 128 bits (16 characters) long.');
+                return;
+            }
+
+            const encrypted = CryptoJS.AES.encrypt(inputText, CryptoJS.enc.Utf8.parse(secretKey), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            const encryptedBase64 = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
+            const outputText = document.getElementById('outputText');
+            outputText.value = encryptedBase64;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(encryptedBase64).then(() => {
+                alert('Encrypted text copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
