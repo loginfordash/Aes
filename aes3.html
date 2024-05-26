@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohama's First Project</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1c1c1c, #2a2a2a);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .encryption-tool {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideIn 1s ease-in-out;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: background 0.3s ease;
+        }
+
+        textarea:focus, input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6200ee, #3700b3);
+            color: #ffffff;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #3700b3, #6200ee);
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rohama's First Project</h1>
+        <div class="encryption-tool">
+            <textarea id="inputText" placeholder="Enter text to encrypt"></textarea>
+            <input type="text" id="secretKey" placeholder="Enter 128-bit secret key">
+            <button onclick="encryptText()">Encrypt</button>
+            <textarea id="outputText" placeholder="Encrypted text will appear here" readonly></textarea>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        document.getElementById('inputText').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('secretKey').focus();
+            }
+        });
+
+        document.getElementById('secretKey').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                encryptText();
+            }
+        });
+
+        function encryptText() {
+            const inputText = document.getElementById('inputText').value;
+            const secretKey = document.getElementById('secretKey').value;
+
+            if (secretKey.length !== 16) {
+                alert('The secret key must be 128 bits (16 characters) long.');
+                return;
+            }
+
+            const encrypted = CryptoJS.AES.encrypt(inputText, CryptoJS.enc.Utf8.parse(secretKey), {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            const encryptedBase64 = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
+            const outputText = document.getElementById('outputText');
+            outputText.value = encryptedBase64;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(encryptedBase64).then(() => {
+                alert('Encrypted text copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
