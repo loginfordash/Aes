@@ -1,0 +1,36 @@
+<script>
+    // AES encryption function
+    const encryptText = (text, key) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+
+        const crypt = new JSEncrypt();
+        crypt.setKey(key);
+
+        const encryptedData = crypt.encrypt(data);
+        const base64EncryptedData = btoa(encryptedData);
+
+        return base64EncryptedData;
+    };
+
+    // Get the secret key and input elements
+    const secretKey = 'your-128-bit-secret-key'; // Replace this with your 128-bit secret key
+    const inputText = document.getElementById('input-text');
+    const encryptionResult = document.getElementById('encryption-result');
+
+    // Add an event listener to the encrypt button
+    document.getElementById('encrypt-button').addEventListener('click', () => {
+        const encryptedText = encryptText(inputText.value, secretKey);
+        encryptionResult.textContent = `Encrypted Text: ${encryptedText}`;
+    });
+
+    // Initialize JSEncrypt library
+    (function () {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/jsencrypt@3.3.0/bin/jsencrypt.min.js';
+        script.onload = () => {
+            console.log('JSEncrypt library loaded');
+        };
+        document.head.appendChild(script);
+    })();
+</script>
