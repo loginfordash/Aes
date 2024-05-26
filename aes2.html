@@ -1,36 +1,95 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rohama's First Project</title>
+  <style>
+    /* Dark theme CSS */
+    body {
+      background-color: #333;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #444;
+      border: 1px solid #555;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    .input-field {
+      margin-bottom: 20px;
+    }
+    .input-field input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #555;
+      color: #fff;
+    }
+    .input-field input[type="text"]:focus {
+      background-color: #666;
+    }
+    .button {
+      background-color: #666;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rohama's First Project</h1>
+    <form>
+      <div class="input-field">
+        <input type="text" id="plaintext" placeholder="Enter text to encrypt">
+      </div>
+      <div class="input-field">
+        <input type="text" id="secretkey" placeholder="Enter 128-bit secret key (16 characters)">
+      </div>
+      <button class="button" id="encrypt-btn">Encrypt</button>
+      <div id="encrypted-text"></div>
+    </form>
+  </div>
+
+  <script>
     // AES encryption function
-    const encryptText = (text, key) => {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(text);
+    function encryptAES(plaintext, secretkey) {
+      const crypto = window.crypto || window.msCrypto;
+      const key = crypto.getRandomValues(new Uint8Array(16)); // 128-bit key
+      key.set(secretkey.split('').map(c => c.charCodeAt(0))); // set secret key
 
-        const crypt = new JSEncrypt();
-        crypt.setKey(key);
+      const plaintextBytes = new TextEncoder('utf-8').encode(plaintext);
+      const cipher = crypto.subtle.encrypt({
+        name: 'AES-ECB',
+        iv: new Uint8Array(0) // ECB mode doesn't use IV
+      }, key, plaintextBytes);
 
-        const encryptedData = crypt.encrypt(data);
-        const base64EncryptedData = btoa(encryptedData);
+      return btoa(String.fromCharCode(...new Uint8Array(cipher)));
+    }
 
-        return base64EncryptedData;
-    };
+    // Event listener for encrypt button
+    document.getElementById('encrypt-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const plaintext = document.getElementById('plaintext').value;
+      const secretkey = document.getElementById('secretkey').value;
 
-    // Get the secret key and input elements
-    const secretKey = 'your-128-bit-secret-key'; // Replace this with your 128-bit secret key
-    const inputText = document.getElementById('input-text');
-    const encryptionResult = document.getElementById('encryption-result');
-
-    // Add an event listener to the encrypt button
-    document.getElementById('encrypt-button').addEventListener('click', () => {
-        const encryptedText = encryptText(inputText.value, secretKey);
-        encryptionResult.textContent = `Encrypted Text: ${encryptedText}`;
+      if (plaintext && secretkey) {
+        const encryptedText = encryptAES(plaintext, secretkey);
+        document.getElementById('encrypted-text').innerHTML = `Encrypted text: ${encryptedText}`;
+      } else {
+        alert('Please enter both plaintext and secret key');
+      }
     });
-
-    // Initialize JSEncrypt library
-    (function () {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/jsencrypt@3.3.0/bin/jsencrypt.min.js';
-        script.onload = () => {
-            console.log('JSEncrypt library loaded');
-        };
-        document.head.appendChild(script);
-    })();
-</script>
+  </script>
+</body>
+</html>
