@@ -5,122 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rohama's First Project</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
         body {
-            font-family: 'Netflix', sans-serif; /* Consider using a fallback font */
-            background-color: #141414;
-            color: white;
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            background: #141414;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
         }
 
         .container {
-            background-color: #212121;
-            padding: 30px;
-            border-radius: 10px;
             text-align: center;
-            position: relative;
         }
 
-        .container h1 {
+        h1 {
             font-size: 2em;
-            margin-bottom: 20px;
+            margin-bottom: 1em;
         }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
+        .input-field {
+            margin: 1em 0;
         }
 
         input, textarea {
+            background: #333333;
+            border: none;
+            color: #ffffff;
+            padding: 0.5em;
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            max-width: 400px;
+            box-sizing: border-box;
+            font-size: 1em;
+            margin-bottom: 0.5em;
+        }
+
+        textarea {
+            height: 100px;
             resize: none;
         }
 
-        .output {
-            margin-bottom: 15px;
-        }
-
-        .output p {
-            margin-bottom: 5px;
-        }
-
-        #ciphertext {
-            height: 100px;
-        }
-
-        button {
-            background-color: #e74c3c;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        /* Snake game animation (replace with your preferred animation code) */
-        @keyframes snake {
-            0% { transform: translateX(-100px); }
-            100% { transform: translateX(100px); }
-        }
-
-        .container::before {
-            content: "";
+        .bg-animation {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(to right, #2196f3, #f44336);
-            animation: snake 5s infinite alternate;
-            opacity: 0.1;
             z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation canvas {
+            width: 100%;
+            height: 100%;
         }
     </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <canvas id="snake-canvas"></canvas>
+    </div>
+    <div class="container">
+        <h1>Rohama's First Project</h1>
+        <div class="input-field">
+            <input type="text" id="password" placeholder="Enter 128-bit Password (16 characters)" maxlength="16" required>
+        </div>
+        <div class="input-field">
+            <textarea id="plaintext" placeholder="Enter Plaintext"></textarea>
+        </div>
+        <div class="input-field">
+            <textarea id="encrypted" placeholder="Encrypted Text" readonly></textarea>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script>
-        const plaintextInput = document.getElementById('plaintext');
-        const passwordInput = document.getElementById('password');
-        const ciphertextOutput = document.getElementById('ciphertext');
-        const encryptButton = document.getElementById('encrypt');
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordField = document.getElementById('password');
+            const plaintextField = document.getElementById('plaintext');
+            const encryptedField = document.getElementById('encrypted');
 
-        // Encryption function using CryptoJS library
-        function encrypt(plaintext, password) {
-            if (!window.CryptoJS) {  // Check for CryptoJS availability
-                alert('The CryptoJS library is required for encryption. Please include it in your project.');
-                return;
-            }
+            const focusNext = (e, nextElement) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    nextElement.focus();
+                }
+            };
 
-            const key = CryptoJS.enc.Utf8.parse(password);
-            const iv = CryptoJS.enc.Utf8.parse(''); // Empty IV for ECB mode
-            const encrypted = CryptoJS.AES.encrypt(plaintext, key, { ivMode: CryptoJS.mode.ECB });
-            return encrypted.toString(CryptoJS.enc.Base64);
-        }
+            passwordField.addEventListener('keydown', (e) => focusNext(e, plaintextField));
+            plaintextField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    encryptText();
+                }
+            });
 
-        passwordInput.addEventListener('keyup', (event) => {
-            if (event.keyCode === 13) { // Enter key pressed
-                encryptButton.click();
-            }
+            const encryptText = () => {
+                const password = passwordField.value;
+                const plaintext = plaintextField.value;
+                if (password.length === 16) {
+                    const encrypted = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Utf8.parse(password), {
+                        mode: CryptoJS.mode.ECB,
+                        padding: CryptoJS.pad.Pkcs7
+                    }).toString();
+                    encryptedField.value = encrypted;
+                    encryptedField.select();
+                    document.execCommand('copy');
+                } else {
+                    alert('Password must be 16 characters long.');
+                }
+            };
+
+            // Snake game background animation
+            const canvas = document.getElementById('snake-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let snake = [{ x: 50, y: 50 }];
+            let direction = { x: 1, y: 0 };
+            const size = 10;
+            let lastTime = 0;
+
+            const gameLoop = (timestamp) => {
+                if (timestamp - lastTime > 100) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    moveSnake();
+                    drawSnake();
+                    lastTime = timestamp;
+                }
+                requestAnimationFrame(gameLoop);
+            };
+
+            const moveSnake = () => {
+                const head = { x: snake[0].x + direction.x * size, y: snake[0].y + direction.y * size };
+                snake.unshift(head);
+                snake.pop();
+            };
+
+            const drawSnake = () => {
+                ctx.fillStyle = '#22c1c3';
+                snake.forEach(segment => ctx.fillRect(segment.x, segment.y, size, size));
+            };
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            requestAnimationFrame(gameLoop);
         });
-
-        encryptButton.addEventListener('click', () => {
-            const plaintext = plaintextInput.value;
-            const password = passwordInput.value;
-
-            if (!plaintext || !password) {
-                alert('Please fill in both Plaintext and Password fields');
-                return;
-            }
-
-            const ciphertext = encrypt(plaintext, password);
-            ciphertextOutput
+    </script>
+</body>
+</html>
