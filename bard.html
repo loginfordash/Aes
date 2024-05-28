@@ -6,7 +6,7 @@
     <title>Rohama's First Project</title>
     <style>
         body {
-            font-family: 'Netflix', sans-serif;
+            font-family: 'Netflix', sans-serif; /* Consider using a fallback font */
             background-color: #141414;
             color: white;
             margin: 0;
@@ -94,7 +94,13 @@
         const ciphertextOutput = document.getElementById('ciphertext');
         const encryptButton = document.getElementById('encrypt');
 
+        // Encryption function using CryptoJS library
         function encrypt(plaintext, password) {
+            if (!window.CryptoJS) {  // Check for CryptoJS availability
+                alert('The CryptoJS library is required for encryption. Please include it in your project.');
+                return;
+            }
+
             const key = CryptoJS.enc.Utf8.parse(password);
             const iv = CryptoJS.enc.Utf8.parse(''); // Empty IV for ECB mode
             const encrypted = CryptoJS.AES.encrypt(plaintext, key, { ivMode: CryptoJS.mode.ECB });
@@ -117,13 +123,4 @@
             }
 
             const ciphertext = encrypt(plaintext, password);
-            ciphertextOutput.value = ciphertext;
-            ciphertextOutput.select();
-            document.execCommand('copy'); // Copy to clipboard
-        });
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Rohama's First Project</h1>
-        <div class="input-group">
+            ciphertextOutput
