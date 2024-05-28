@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohama's First Project</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            background: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .encryption-tool {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        input, textarea, button {
+            width: calc(100% - 40px);
+            margin: 10px 20px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input, textarea {
+            background: #222;
+            color: #fff;
+        }
+
+        button {
+            background: #e50914;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #f40612;
+        }
+
+        textarea[readonly] {
+            background: #333;
+        }
+
+        @keyframes snake-bg {
+            0% { background-position: 0 0; }
+            100% { background-position: 100% 100%; }
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('snake-bg.png') repeat;
+            opacity: 0.1;
+            animation: snake-bg 60s linear infinite;
+            z-index: -1;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordInput = document.getElementById('password');
+            const plaintextInput = document.getElementById('plaintext');
+            const encryptedOutput = document.getElementById('encrypted');
+            const encryptBtn = document.getElementById('encryptBtn');
+
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    plaintextInput.focus();
+                }
+            });
+
+            plaintextInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    encryptText();
+                }
+            });
+
+            encryptBtn.addEventListener('click', encryptText);
+
+            function encryptText() {
+                const password = passwordInput.value;
+                const plaintext = plaintextInput.value;
+
+                if (password.length !== 16) {
+                    alert('Password must be 16 characters long.');
+                    return;
+                }
+
+                const encrypted = CryptoJS.AES.encrypt(plaintext, CryptoJS.enc.Utf8.parse(password), {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7
+                }).toString();
+
+                encryptedOutput.value = encrypted;
+                encryptedOutput.select();
+                document.execCommand('copy');
+                alert('Encrypted text copied to clipboard.');
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="encryption-tool">
+            <h1>Rohama's AES Encryption Tool</h1>
+            <input type="text" id="password" placeholder="Enter 128-bit Password" maxlength="16">
+            <textarea id="plaintext" placeholder="Enter Plaintext"></textarea>
+            <button id="encryptBtn">Encrypt</button>
+            <textarea id="encrypted" readonly placeholder="Encrypted Text"></textarea>
+        </div>
+    </div>
+</body>
+</html>
